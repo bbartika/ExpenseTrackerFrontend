@@ -19,7 +19,6 @@ function addNewExpense(e){
 }
 
 
-
 function addNewExpensetoUI(expense){
     const parentElement = document.getElementById('listOfExpenses');
     const expenseElemId = `expense-${expense.id}`;
@@ -46,6 +45,7 @@ function deleteExpense(e, expenseid) {
 function showError(err){
     document.body.innerHTML += `<div style="color:red;"> ${err}</div>`
 }
+
 
 function removeExpensefromUI(expenseid){
     const expenseElemId = `expense-${expenseid}`;

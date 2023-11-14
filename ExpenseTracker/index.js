@@ -23,7 +23,35 @@ function showPremiumuserMessage() {
     document.getElementById('message').innerHTML = "You are a premium user "
 }
 
+function parseJwt (token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
 
+    return JSON.parse(jsonPayload);
+}
+
+window.addEventListener('DOMContentLoaded', ()=> {
+    const token  = localStorage.getItem('token')
+    const decodeToken = parseJwt(token)
+    console.log(decodeToken)
+    const ispremiumuser = decodeToken.ispremiumuser
+    if(ispremiumuser){
+        showPremiumuserMessage()
+        showLeaderboard()
+    }
+    axios.get('http://localhost:3000/expense/getexpenses', { headers: {"Authorization" : token} })
+    .then(response => {
+            response.data.expenses.forEach(expense => {
+
+                addNewExpensetoUI(expense);
+            })
+    }).catch(err => {
+        showError(err)
+    })
+});
 
 function addNewExpensetoUI(expense){
     const parentElement = document.getElementById('listOfExpenses');
@@ -51,7 +79,24 @@ function deleteExpense(e, expenseid) {
 function showError(err){
     document.body.innerHTML += `<div style="color:red;"> ${err}</div>`
 }
+function showLeaderboard(){
+    const inputElement = document.createElement("input")
+    inputElement.type = "button"
+    inputElement.value = 'Show Leaderboard'
+    inputElement.onclick = async() => {
+        const token = localStorage.getItem('token')
+        const userLeaderBoardArray = await axios.get('http://localhost:3000/premium/showLeaderBoard', { headers: {"Authorization" : token} })
+        console.log(userLeaderBoardArray)
 
+        var leaderboardElem = document.getElementById('leaderboard')
+        leaderboardElem.innerHTML += '<h1> Leader Board </<h1>'
+        userLeaderBoardArray.data.forEach((userDetails) => {
+            leaderboardElem.innerHTML += `<li>Name - ${userDetails.name} Total Expense - ${userDetails.total_cost || 0} </li>`
+        })
+    }
+    document.getElementById("message").appendChild(inputElement);
+
+}
 
 function removeExpensefromUI(expenseid){
     const expenseElemId = `expense-${expenseid}`;

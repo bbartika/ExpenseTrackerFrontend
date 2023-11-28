@@ -35,9 +35,12 @@ function parseJwt (token) {
 
 window.addEventListener('DOMContentLoaded', ()=> {
     const token  = localStorage.getItem('token')
+    
     const decodeToken = parseJwt(token)
     console.log(decodeToken)
+    
     const ispremiumuser = decodeToken.ispremiumuser
+    
     if(ispremiumuser){
         showPremiumuserMessage()
         showLeaderboard()
@@ -97,7 +100,6 @@ function showLeaderboard(){
     document.getElementById("message").appendChild(inputElement);
 
 }
-
 function removeExpensefromUI(expenseid){
     const expenseElemId = `expense-${expenseid}`;
     document.getElementById(expenseElemId).remove();
@@ -109,21 +111,20 @@ document.getElementById('rzp-button1').onclick = async function (e) {
     console.log(response);
     var options =
     {
-     "key": response.data.key_id, // Enter the Key ID generated from the Dashboard
+     "key": 'rzp_test_WuARwl5TqUuk5f', // Enter the Key ID generated from the Dashboard
      "order_id": response.data.order.id,// For one time payment
      // This handler function will handle the success payment
      "handler": async function (response) {
         const res = await axios.post('http://localhost:3000/purchase/updatetransactionstatus',{
              order_id: options.order_id,
-             payment_id: response.razorpay_payment_id,
-         }, { headers: {"Authorization" : token} })
+             payment_id: response.razorpay_payment_id,    
+         },{ headers: {"Authorization" : token } }) 
         
         console.log(res)
          alert('You are a Premium User Now')
          document.getElementById('rzp-button1').style.visibility = "hidden"
          document.getElementById('message').innerHTML = "You are a premium user "
-         localStorage.setItem('token', res.data.token)
-         showLeaderboard()
+         localStorage.setItem('token',res.data.token)
      },
   };
   const rzp1 = new Razorpay(options);
